@@ -7,7 +7,13 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
+
+import com.example.joseph.picsound.Utils.AnalyzeImageTask;
+import com.microsoft.projectoxford.vision.contract.AnalysisResult;
+import com.microsoft.projectoxford.vision.contract.Category;
+import com.microsoft.projectoxford.vision.contract.Tag;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,17 +31,35 @@ public class Analyze extends AppCompatActivity {
             byte[] byteArray = bundle.getByteArray("ByteArray");
             Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
             image.setImageBitmap(bmp);
+            analyzeInBackground(bmp);
         }
         if((int) bundle.get("Type")==GALARY){
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), (Uri) bundle.get("URI"));
                 image.setImageBitmap(bitmap);
+                analyzeInBackground(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
+    }
 
+    private void analyzeInBackground(Bitmap bmp) {
 
+        AnalyzeImageTask task = new AnalyzeImageTask(new AnalyzeImageTask.AnalysisCompleteCallback() {
+            @Override
+            public void onAnalysisComplete(AnalysisResult result) {
+                for (Tag tag : result.tags) {
+                    Log.v("TAG", tag.name + "(p=" + tag.confidence + ")");
+                }
+
+                for (Category cat : result.categories) {
+                    Log.v("CATEGORY", cat.name);
+                }
+
+            }
+        }, bmp);
+
+        task.execute();
     }
 }
