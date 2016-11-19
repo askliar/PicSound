@@ -1,5 +1,6 @@
 package com.example.joseph.picsound;
 
+import android.content.ClipData;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -21,26 +22,31 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayList;
 
+import com.example.joseph.picsound.Utils.*;
 public class MainActivity extends AppCompatActivity {
 
     ImageView mImageView;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int GALARY_RETURN = 2;
+    static final int PICK_IMAGE_MULTIPLE = 2;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button CameraOpen = (Button) findViewById(R.id.CameraOpen);
         Button GalaryOpen = (Button) findViewById(R.id.GalaryOpening);
+
+
+
         GalaryOpen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(
-                        Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-                startActivityForResult(i, GALARY_RETURN);
-
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent,"Select Picture"), PICK_IMAGE_MULTIPLE);
             }
         });
 
@@ -76,15 +82,25 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("Type",1);
             startActivity(intent);
         }
-        if (requestCode == GALARY_RETURN && resultCode == RESULT_OK && null != data) {
+        if (requestCode == GALARY_RETURN && resultCode == RESULT_OK && data !=null && null == data.getClipData()  ) {
             Uri selectedImage = data.getData();
-
-            Intent intent =new Intent(MainActivity.this,Analyze.class);
-            intent.putExtra("URI",  selectedImage);
-            intent.putExtra("Type",2);
+            Intent intent = new Intent(MainActivity.this, Analyze.class);
+            intent.putExtra("URI", selectedImage);
+            intent.putExtra("Type", 2);
             startActivity(intent);
-
-
+        }
+        if(requestCode == PICK_IMAGE_MULTIPLE && resultCode == RESULT_OK && data !=null  && null != data.getClipData()){
+            String[] filePathColumn = { MediaStore.Images.Media.DATA };
+            ClipData mClipData = data.getClipData();
+            ArrayList<Uri> mArrayUri = new ArrayList<Uri>();
+            for(int i=0;i<mClipData.getItemCount();i++){
+                mArrayUri.add(mClipData.getItemAt(i).getUri());
+            }
+            Intent intent = new Intent(MainActivity.this, Analyze.class);
+            intent.putExtra("URIList", mArrayUri);
+            intent.putExtra("Type", 3);
+            intent.putExtra("FilePathColumn",filePathColumn);
+            startActivity(intent);
         }
     }
 }
