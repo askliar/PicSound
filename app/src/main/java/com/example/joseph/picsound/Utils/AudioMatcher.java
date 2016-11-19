@@ -21,10 +21,10 @@ public class AudioMatcher {
         mResources = c.getResources();
     }
 
-    public List<Integer> soundIdsFromTags(List<Tag> tags) {
+    public List<Integer> soundIdsFromTags(List<String> tags) {
         List<Integer> soundIds = new ArrayList<>();
 
-        for (Tag tag : tags) {
+        for (String tag : tags) {
             int newSoundId = soundIdFromTag(tag);
             if(newSoundId != 0)
                 soundIds.add(newSoundId);
@@ -33,12 +33,12 @@ public class AudioMatcher {
         return soundIds;
     }
 
-    public int soundIdFromTag(Tag tag) {
+    public int soundIdFromTag(String tag) {
 
-        int soundId = getResId(tag.name);
+        int soundId = getResId(tag);
 
         if(soundId == 0) {
-            for (String tag2 : getAlternativeTags(tag.name)) {
+            for (String tag2 : getAlternativeTags(tag)) {
                 soundId = getResId(tag2);
                 if(soundId != 0) {
                     break;

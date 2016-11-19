@@ -1,24 +1,18 @@
 package com.example.joseph.picsound;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.example.joseph.picsound.Utils.AnalyzeImageTask;
 import com.example.joseph.picsound.Utils.Audio;
 import com.example.joseph.picsound.Utils.AudioMatcher;
 import com.example.joseph.picsound.Utils.Tuple;
-
-import com.microsoft.projectoxford.vision.contract.AnalysisResult;
 import com.microsoft.projectoxford.vision.contract.Category;
-import com.microsoft.projectoxford.vision.contract.Tag;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,11 +30,10 @@ import clarifai2.dto.model.output.ClarifaiOutput;
 import clarifai2.dto.prediction.Concept;
 
 public class Analyze extends AppCompatActivity {
+    static final int CAMERA = 1;
+    static final int GALARY = 2;
     @Nullable
     private ClarifaiClient client;
-    static final int CAMERA=1;
-    static final int GALARY=2;
-
     private Audio audio;
     private AudioMatcher matcher;
 
@@ -55,27 +48,27 @@ public class Analyze extends AppCompatActivity {
 
         ImageView image = (ImageView) findViewById(R.id.Image);
         Bundle bundle = getIntent().getExtras();
-        if((int) bundle.get("Type")==CAMERA){
-            byte[] byteArray = bundle.getByteArray("ByteArray");
-            analyzeInBackground(byteArray);
+        byte[] byteArray = null;
+        if ((int) bundle.get("Type") == CAMERA) {
+            byteArray = bundle.getByteArray("ByteArray");
         }
-        if((int) bundle.get("Type")== GALARY){
+        if ((int) bundle.get("Type") == GALARY) {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), (Uri) bundle.get("URI"));
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                byte[] byteArray = stream.toByteArray();
-                analyzeInBackground(byteArray);
+                byteArray = stream.toByteArray();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         Future<ClarifaiClient> clientFuture = new ClarifaiBuilder(getString(R.string.clarify_app_id), getString(R.string.clarify_app_key)).build();
-        try{
+        try {
             client = clientFuture.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+            List<byte[]> byteArrayList = new ArrayList<byte[]>();
+            byteArrayList.add(byteArray);
+            analyzeInBackground(byteArrayList);
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
@@ -86,31 +79,49 @@ public class Analyze extends AppCompatActivity {
         super.onPause();
     }
 
-    private void analyzeInBackground(byte[] bmp/*Bitmap bmp*/) {
-
+    private void analyzeInBackground(List<byte[]> bmps/*Bitmap bmp*/) {
+        List<ClarifaiInput> inputs = new ArrayList<>();
+        for (byte[] image:
+             bmps) {
+            inputs.add(ClarifaiInput.forImage(ClarifaiImage.of(image)));
+        }
         client.getDefaultModels().generalModel().predict()
                 .withInputs(
-                        ClarifaiInput.forImage(ClarifaiImage.of(bmp))
+                    inputs
                 )
                 .executeAsync(new ClarifaiRequest.Callback<List<ClarifaiOutput<Concept>>>() {
-                    @Override
-                    public void onClarifaiResponseSuccess(List<ClarifaiOutput<Concept>> clarifaiOutputs) {
-                        for (ClarifaiOutput<Concept> clarifaiOutput:
-                                clarifaiOutputs) {
-                            Log.d("Nothing", "break");
-                        }
-                    }
+                                  @Override
+                                  public void onClarifaiResponseSuccess(List<ClarifaiOutput<Concept>> clarifaiOutputs) {
+                                      for (ClarifaiOutput<Concept> clarifaiOutput :
+                                              clarifaiOutputs) {
+                                          for (Concept concept :
+                                                  clarifaiOutput.data()) {
+                                              List<Tuple<Integer, Float>> sounds = new ArrayList<>();
+                                              int soundId = matcher.soundIdFromTag(concept.name());
+                                              if (soundId != 0) {
+                                                  Log.v("TAG_ID", soundId + "");
+                                                  sounds.add(new Tuple<>(soundId, 1.0f));
+                                              }
 
-                    @Override
-                    public void onClarifaiResponseUnsuccessful(int errorCode) {
-                        Log.d("request unsuccessful", "Error code is: " + errorCode);
-                    }
+                                              Log.v("TAG", concept.name() + "(p=" + concept.value() + ")");
 
-                    @Override
-                    public void onClarifaiResponseNetworkError(IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+                                              audio.playSounds(sounds);
+                                          }
+                                      }
+                                  }
+
+                                  @Override
+                                  public void onClarifaiResponseUnsuccessful(int errorCode) {
+                                      Log.d("request unsuccessful", "Error code is: " + errorCode);
+                                  }
+
+                                  @Override
+                                  public void onClarifaiResponseNetworkError(IOException e) {
+                                      e.printStackTrace();
+                                  }
+                              }
+
+                );
 
 //        AnalyzeImageTask task = new AnalyzeImageTask(new AnalyzeImageTask.AnalysisCompleteCallback() {
 //            @Override
