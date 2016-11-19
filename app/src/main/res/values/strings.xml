@@ -4,4 +4,6 @@
     <string name="title_activity_analyze">Analyze</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="clarify_app_id">r7zq8kEVC2T7kb6pUTHAQRVLJXBCU9uZRIkwpM4P</string>
+    <string name="clarify_app_key">zt69CZfKGEGY3tGbv92ygr7CYa9wMA1UwrrFA2n_</string>
 </resources>

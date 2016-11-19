@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,11 +20,24 @@ import com.microsoft.projectoxford.vision.contract.AnalysisResult;
 import com.microsoft.projectoxford.vision.contract.Category;
 import com.microsoft.projectoxford.vision.contract.Tag;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import clarifai2.api.ClarifaiBuilder;
+import clarifai2.api.ClarifaiClient;
+import clarifai2.api.request.ClarifaiRequest;
+import clarifai2.dto.input.ClarifaiInput;
+import clarifai2.dto.input.image.ClarifaiImage;
+import clarifai2.dto.model.output.ClarifaiOutput;
+import clarifai2.dto.prediction.Concept;
 
 public class Analyze extends AppCompatActivity {
+    @Nullable
+    private ClarifaiClient client;
     static final int CAMERA=1;
     static final int GALARY=2;
 
@@ -43,18 +57,26 @@ public class Analyze extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         if((int) bundle.get("Type")==CAMERA){
             byte[] byteArray = bundle.getByteArray("ByteArray");
-            Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-            image.setImageBitmap(bmp);
-            analyzeInBackground(bmp);
+            analyzeInBackground(byteArray);
         }
-        if((int) bundle.get("Type")==GALARY){
+        if((int) bundle.get("Type")== GALARY){
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), (Uri) bundle.get("URI"));
-                image.setImageBitmap(bitmap);
-                analyzeInBackground(bitmap);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                byte[] byteArray = stream.toByteArray();
+                analyzeInBackground(byteArray);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        Future<ClarifaiClient> clientFuture = new ClarifaiBuilder(getString(R.string.clarify_app_id), getString(R.string.clarify_app_key)).build();
+        try{
+            client = clientFuture.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
     }
 
@@ -64,31 +86,55 @@ public class Analyze extends AppCompatActivity {
         super.onPause();
     }
 
-    private void analyzeInBackground(Bitmap bmp) {
+    private void analyzeInBackground(byte[] bmp/*Bitmap bmp*/) {
 
-        AnalyzeImageTask task = new AnalyzeImageTask(new AnalyzeImageTask.AnalysisCompleteCallback() {
-            @Override
-            public void onAnalysisComplete(AnalysisResult result) {
-                if (result != null) {
-                    List<Tuple<Integer, Float>> sounds = new ArrayList<>();
-                    for (Tag tag : result.tags) {
-                        int soundId = matcher.soundIdFromTag(tag);
-                        if(soundId != 0) {
-                            Log.v("TAG_ID", soundId + "");
-                            sounds.add(new Tuple<>(soundId, 1.0f));
+        client.getDefaultModels().generalModel().predict()
+                .withInputs(
+                        ClarifaiInput.forImage(ClarifaiImage.of(bmp))
+                )
+                .executeAsync(new ClarifaiRequest.Callback<List<ClarifaiOutput<Concept>>>() {
+                    @Override
+                    public void onClarifaiResponseSuccess(List<ClarifaiOutput<Concept>> clarifaiOutputs) {
+                        for (ClarifaiOutput<Concept> clarifaiOutput:
+                                clarifaiOutputs) {
+                            Log.d("Nothing", "break");
                         }
-
-                        Log.v("TAG", tag.name + "(p=" + tag.confidence + ")");
                     }
 
-                    audio.playSounds(sounds);
-                    for (Category cat : result.categories) {
-                        Log.v("CATEGORY", cat.name);
+                    @Override
+                    public void onClarifaiResponseUnsuccessful(int errorCode) {
+                        Log.d("request unsuccessful", "Error code is: " + errorCode);
                     }
-                }
-            }
-        }, bmp);
 
-        task.execute();
+                    @Override
+                    public void onClarifaiResponseNetworkError(IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+//        AnalyzeImageTask task = new AnalyzeImageTask(new AnalyzeImageTask.AnalysisCompleteCallback() {
+//            @Override
+//            public void onAnalysisComplete(AnalysisResult result) {
+//                if (result != null) {
+//                    List<Tuple<Integer, Float>> sounds = new ArrayList<>();
+//                    for (Tag tag : result.tags) {
+//                        int soundId = matcher.soundIdFromTag(tag);
+//                        if(soundId != 0) {
+//                            Log.v("TAG_ID", soundId + "");
+//                            sounds.add(new Tuple<>(soundId, 1.0f));
+//                        }
+//
+//                        Log.v("TAG", tag.name + "(p=" + tag.confidence + ")");
+//                    }
+//
+//                    audio.playSounds(sounds);
+//                    for (Category cat : result.categories) {
+//                        Log.v("CATEGORY", cat.name);
+//                    }
+//                }
+//            }
+//        }, bmp);
+//
+//        task.execute();
     }
 }
