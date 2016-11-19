@@ -65,9 +65,7 @@ public class Analyze extends AppCompatActivity {
         Future<ClarifaiClient> clientFuture = new ClarifaiBuilder(getString(R.string.clarify_app_id), getString(R.string.clarify_app_key)).build();
         try {
             client = clientFuture.get();
-            List<byte[]> byteArrayList = new ArrayList<byte[]>();
-            byteArrayList.add(byteArray);
-            analyzeInBackground(byteArrayList);
+            analyzeInBackground(byteArray);
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -79,15 +77,11 @@ public class Analyze extends AppCompatActivity {
         super.onPause();
     }
 
-    private void analyzeInBackground(List<byte[]> bmps/*Bitmap bmp*/) {
-        List<ClarifaiInput> inputs = new ArrayList<>();
-        for (byte[] image:
-             bmps) {
-            inputs.add(ClarifaiInput.forImage(ClarifaiImage.of(image)));
-        }
+    private void analyzeInBackground(byte[] bmp/*Bitmap bmp*/) {
+
         client.getDefaultModels().generalModel().predict()
                 .withInputs(
-                    inputs
+                        ClarifaiInput.forImage(ClarifaiImage.of(bmp))
                 )
                 .executeAsync(new ClarifaiRequest.Callback<List<ClarifaiOutput<Concept>>>() {
                                   @Override
