@@ -5,14 +5,19 @@ import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.os.Build;
+import android.os.Handler;
+import android.util.Log;
+
 import com.example.joseph.picsound.Utils.Tuple;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Audio {
+public class Audio implements SoundPool.OnLoadCompleteListener {
     SoundPool soundPool;
     Context context;
-    // first argument - id of audio thread, second - it's volume;
+    int numLoaded;
+    boolean loaded;
+    // first argument - id of audio thread, second - its volume;
     List<Tuple<Integer, Float>> soundInfos;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -26,6 +31,19 @@ public class Audio {
         this.soundPool = builder.build();
         this.context = context;
         soundInfos = new ArrayList<>();
+        numLoaded = 0;
+        loaded = true;
+        soundPool.setOnLoadCompleteListener(this);
+    }
+
+    private void playAfterDelay(long delayMillis, final int resId) {
+        soundPool.stop(resId);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                soundPool.resume(resId);
+            }
+        }, delayMillis);
     }
 
     /***
@@ -39,16 +57,38 @@ public class Audio {
             float volume = tuple.getSecond();
             soundInfos.add(new Tuple<Integer, Float>(soundPool.load(context, resId, 1), volume));
         }
-        for (Tuple<Integer, Float> soundInfo:
-             soundInfos) {
-            soundPool.play(soundInfo.getFirst(), soundInfo.getSecond(), soundInfo.getSecond(), 1, -1, 1.0f);
+        while (numLoaded <= fileInfos.size()) {
+            if (!loaded){
+                Log.d("ERROR", "playSounds: some of sounds coudn\'t be loaded");
+                break;
+            }
+            if (numLoaded == fileInfos.size() && loaded) {
+                for (final Tuple<Integer, Float> soundInfo :
+                        soundInfos) {
+                    soundPool.play(soundInfo.getFirst(), soundInfo.getSecond(), soundInfo.getSecond(), 1, -1, 1.0f);
+                }
+            }
         }
     }
 
-    public void stopSound(){
+    public void stopSoundPool(){
+        stopAudio();
         for (Tuple<Integer, Float> soundInfo:
              soundInfos) {
+            soundPool.unload(soundInfo.getFirst());
+        }
+    }
+
+    public void stopAudio(){
+        for (Tuple<Integer, Float> soundInfo:
+                soundInfos) {
             soundPool.stop(soundInfo.getFirst());
         }
+    }
+
+    @Override
+    public void onLoadComplete(SoundPool soundPool, int i, int i1) {
+        numLoaded++;
+        loaded = loaded && (i1 != 0);
     }
 }

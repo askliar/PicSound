@@ -75,7 +75,7 @@ public class Analyze extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        audio.stopSound();
+        audio.stopAudio();
         super.onPause();
     }
 
