@@ -1,5 +1,6 @@
 package com.example.joseph.picsound;
 
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,10 +31,11 @@ import clarifai2.dto.model.output.ClarifaiOutput;
 import clarifai2.dto.prediction.Concept;
 
 public class Analyze extends AppCompatActivity {
-    static final int CAMERA = 1;
-    static final int GALARY = 2;
     @Nullable
     private ClarifaiClient client;
+    static final int CAMERA=1;
+    static final int GALARY=2;
+    static final int GALARYMULTIPLE=3;
     private Audio audio;
     private AudioMatcher matcher;
 
@@ -45,40 +47,62 @@ public class Analyze extends AppCompatActivity {
         audio = new Audio(getApplicationContext());
         matcher = new AudioMatcher(getApplicationContext());
 
-
         ImageView image = (ImageView) findViewById(R.id.Image);
         Bundle bundle = getIntent().getExtras();
-        byte[] byteArray = null;
-        if ((int) bundle.get("Type") == CAMERA) {
-            byteArray = bundle.getByteArray("ByteArray");
+        ArrayList<byte[]> byteArray = new ArrayList<byte[]>();
+
+        Log.d("bundle",String.valueOf(bundle.get("Type")));
+        if( ((int) bundle.get("Type"))==CAMERA){
+            byteArray.add(bundle.getByteArray("ByteArray"));
         }
-        if ((int) bundle.get("Type") == GALARY) {
+        if( ((int) bundle.get("Type"))== GALARY){
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), (Uri) bundle.get("URI"));
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                byteArray = stream.toByteArray();
+                byte[] bytes = stream.toByteArray();
+                byteArray.add(bytes);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        if( ((int) bundle.get("Type"))== GALARYMULTIPLE){
+            ArrayList<Uri> uriList= (ArrayList<Uri>) bundle.get("URIList");
+
+            String[] filePathColumn = (String[]) bundle.get("FilePathColumn");
+            for(int i=0;i<uriList.size();i++) {
+                Bitmap bitmap = null;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uriList.get(i));
+                    Log.d("null",String.valueOf(bitmap.toString()));
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    byteArray.add(stream.toByteArray());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+
         Future<ClarifaiClient> clientFuture = new ClarifaiBuilder(getString(R.string.clarify_app_id), getString(R.string.clarify_app_key)).build();
         try {
             client = clientFuture.get();
-            analyzeInBackground(byteArray);
-        } catch (InterruptedException | ExecutionException e) {
+            analyzeInBackground(byteArray.get(0));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause(){
         audio.stopAudio();
         super.onPause();
     }
 
     private void analyzeInBackground(byte[] bmp/*Bitmap bmp*/) {
-
         client.getDefaultModels().generalModel().predict()
                 .withInputs(
                         ClarifaiInput.forImage(ClarifaiImage.of(bmp))
