@@ -3,6 +3,7 @@ package com.example.joseph.picsound;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -11,11 +12,13 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.joseph.picsound.Utils.AnalyzeImageTask;
+import com.example.joseph.picsound.Utils.SoundMatcher;
 import com.microsoft.projectoxford.vision.contract.AnalysisResult;
 import com.microsoft.projectoxford.vision.contract.Category;
 import com.microsoft.projectoxford.vision.contract.Tag;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URI;
 
 public class Analyze extends AppCompatActivity {
@@ -49,14 +52,24 @@ public class Analyze extends AppCompatActivity {
         AnalyzeImageTask task = new AnalyzeImageTask(new AnalyzeImageTask.AnalysisCompleteCallback() {
             @Override
             public void onAnalysisComplete(AnalysisResult result) {
-                for (Tag tag : result.tags) {
-                    Log.v("TAG", tag.name + "(p=" + tag.confidence + ")");
-                }
+                SoundMatcher matcher = new SoundMatcher(getApplicationContext());
 
-                for (Category cat : result.categories) {
-                    Log.v("CATEGORY", cat.name);
-                }
+                if (result != null) {
+                    for (Tag tag : result.tags) {
+                        int soundId = matcher.soundIdFromTag(tag);
+                        if(soundId != 0) {
+                            Log.v("TAG_ID", soundId + "");
+                            MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), soundId);
+                            mediaPlayer.start();
+                        }
 
+                        Log.v("TAG", tag.name + "(p=" + tag.confidence + ")");
+                    }
+
+                    for (Category cat : result.categories) {
+                        Log.v("CATEGORY", cat.name);
+                    }
+                }
             }
         }, bmp);
 
