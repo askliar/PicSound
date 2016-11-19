@@ -5,12 +5,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.IntegerRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.joseph.picsound.Utils.Audio;
+import com.example.joseph.picsound.Utils.AudioInformation;
 import com.example.joseph.picsound.Utils.AudioMatcher;
 import com.example.joseph.picsound.Utils.Tuple;
 import com.microsoft.projectoxford.vision.contract.Category;
@@ -112,19 +114,19 @@ public class Analyze extends AppCompatActivity {
                                   public void onClarifaiResponseSuccess(List<ClarifaiOutput<Concept>> clarifaiOutputs) {
                                       for (ClarifaiOutput<Concept> clarifaiOutput :
                                               clarifaiOutputs) {
+                                          List<String> tags = new ArrayList<String>();
                                           for (Concept concept :
                                                   clarifaiOutput.data()) {
-                                              List<Tuple<Integer, Float>> sounds = new ArrayList<>();
-                                              int soundId = matcher.soundIdFromTag(concept.name());
-                                              if (soundId != 0) {
-                                                  Log.v("TAG_ID", soundId + "");
-                                                  sounds.add(new Tuple<>(soundId, 1.0f));
-                                              }
-
+                                              tags.add(concept.name());
                                               Log.v("TAG", concept.name() + "(p=" + concept.value() + ")");
-
-                                              audio.playSounds(sounds);
                                           }
+                                          List<Integer> soundIds = matcher.soundIdsFromStrings(tags);
+                                          List<AudioInformation> audioInformations = new ArrayList<AudioInformation>();
+                                          for (Integer soundId:
+                                               soundIds) {
+                                              audioInformations.add(new AudioInformation(soundId, -1, 1.0f, 0, -1));
+                                          }
+                                          audio.playSounds(audioInformations);
                                       }
                                   }
 
@@ -140,30 +142,5 @@ public class Analyze extends AppCompatActivity {
                               }
 
                 );
-
-//        AnalyzeImageTask task = new AnalyzeImageTask(new AnalyzeImageTask.AnalysisCompleteCallback() {
-//            @Override
-//            public void onAnalysisComplete(AnalysisResult result) {
-//                if (result != null) {
-//                    List<Tuple<Integer, Float>> sounds = new ArrayList<>();
-//                    for (Tag tag : result.tags) {
-//                        int soundId = matcher.soundIdFromTag(tag);
-//                        if(soundId != 0) {
-//                            Log.v("TAG_ID", soundId + "");
-//                            sounds.add(new Tuple<>(soundId, 1.0f));
-//                        }
-//
-//                        Log.v("TAG", tag.name + "(p=" + tag.confidence + ")");
-//                    }
-//
-//                    audio.playSounds(sounds);
-//                    for (Category cat : result.categories) {
-//                        Log.v("CATEGORY", cat.name);
-//                    }
-//                }
-//            }
-//        }, bmp);
-//
-//        task.execute();
     }
 }
