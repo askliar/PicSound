@@ -10,14 +10,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
 
-<<<<<<< 9b1f517b4dcf5dedd044f6aaad57f61cc9728a21
 import com.example.joseph.picsound.Utils.AnalyzeImageTask;
 import com.example.joseph.picsound.Utils.Audio;
 import com.example.joseph.picsound.Utils.AudioMatcher;
 import com.example.joseph.picsound.Utils.Tuple;
-=======
-import com.example.joseph.picsound.Utils.*;
->>>>>>> Added synonyms
+
 import com.microsoft.projectoxford.vision.contract.AnalysisResult;
 import com.microsoft.projectoxford.vision.contract.Category;
 import com.microsoft.projectoxford.vision.contract.Tag;
