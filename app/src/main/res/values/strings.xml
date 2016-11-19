@@ -8,14 +8,17 @@
     <string name="clarify_app_key">zt69CZfKGEGY3tGbv92ygr7CYa9wMA1UwrrFA2n_</string>
 
     <string-array name="sound_names">
+
+        <item>baby</item>
         <item>baby_laughing</item>
         <item>bird</item>
         <item>campfire</item>
         <item>car</item>
         <item>cat</item>
+        <item>child</item>
         <item>cow</item>
-        <item>crowd</item>
         <item>crowd_talking</item>
+        <item>crowded</item>
         <item>dog</item>
         <item>fire</item>
         <item>intersection</item>
@@ -23,17 +26,19 @@
         <item>kids</item>
         <item>kids_playing</item>
         <item>lake</item>
-        <item>man_laughing</item>
+        <item>laughing</item>
+        <item>people</item>
         <item>rain</item>
         <item>river</item>
         <item>rooster</item>
         <item>spring_weather</item>
+        <item>street</item>
         <item>thunder</item>
         <item>traffic</item>
         <item>walking_in_snow</item>
         <item>water</item>
         <item>waves</item>
         <item>windy_forest_ambience</item>
+
     </string-array>
->>>>>>> 986b52d3ec31b61640426b9b0d5eeea7f6bb45ed
 </resources>
