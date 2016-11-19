@@ -1,5 +1,6 @@
 package com.example.joseph.picsound;
 
+import android.app.ProgressDialog;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -42,6 +43,7 @@ public class Analyze extends AppCompatActivity implements View.OnClickListener {
     static final int GALARYMULTIPLE=3;
     private Audio audio;
     private AudioMatcher matcher;
+    private ProgressDialog loadingIndicator;
 
     private int galery_state = 0;
     private ArrayList<byte[]> byteArray;
@@ -100,6 +102,7 @@ public class Analyze extends AppCompatActivity implements View.OnClickListener {
                 image.setImageBitmap(bitmap2);
             }
         }
+        loadingIndicator = ProgressDialog.show(this, "Loading", "Please wait...");
 
         Future<ClarifaiClient> clientFuture = new ClarifaiBuilder(getString(R.string.clarify_app_id), getString(R.string.clarify_app_key)).build();
         try {
@@ -142,16 +145,19 @@ public class Analyze extends AppCompatActivity implements View.OnClickListener {
                                           }
                                           audio.playSounds(audioInformations);
                                       }
+                                      loadingIndicator.dismiss();
                                   }
 
                                   @Override
                                   public void onClarifaiResponseUnsuccessful(int errorCode) {
                                       Log.d("request unsuccessful", "Error code is: " + errorCode);
+                                      loadingIndicator.dismiss();
                                   }
 
                                   @Override
                                   public void onClarifaiResponseNetworkError(IOException e) {
                                       e.printStackTrace();
+                                      loadingIndicator.dismiss();
                                   }
                               }
 

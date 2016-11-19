@@ -23,13 +23,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Pick From Gallery"
-            android:id="@+id/GalaryOpening" />
+            android:id="@+id/GalaryOpening"
+            style="@style/Widget.AppCompat.Button.Colored" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView"
+            tools:text="\u2014 OR \u2014"
+            android:textSize="18sp"
+            android:textAlignment="center" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Take Photo"
-            android:id="@+id/CameraOpen" />
+            android:id="@+id/CameraOpen"
+            style="@style/Widget.AppCompat.Button.Colored" />
 
     </LinearLayout>
 </RelativeLayout>
