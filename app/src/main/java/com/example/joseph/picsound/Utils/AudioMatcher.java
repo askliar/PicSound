@@ -13,11 +13,11 @@ import java.util.List;
  * Created by Rafael Bankosegger on 19/11/2016.
  */
 
-public class SoundMatcher {
+public class AudioMatcher {
 
     private Resources mResources;
 
-    public SoundMatcher(Context c) {
+    public AudioMatcher(Context c) {
         mResources = c.getResources();
     }
 
