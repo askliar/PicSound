@@ -1,14 +1,19 @@
 package com.example.joseph.picsound;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.ClipData;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Path;
 import android.graphics.Picture;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -26,6 +31,8 @@ import java.util.ArrayList;
 
 import com.example.joseph.picsound.Utils.*;
 public class MainActivity extends AppCompatActivity {
+
+    private static final int CAMERA_REQUEST_CODE = 0;
 
     ImageView mImageView;
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -53,15 +60,46 @@ public class MainActivity extends AppCompatActivity {
         CameraOpen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                takePicture();
+                requestTakePicture();
             }
         });
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void requestTakePicture() {
+        if (checkSelfPermission(Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.CAMERA},
+                    CAMERA_REQUEST_CODE);
+        } else {
+            takePicture();
+        }
     }
 
     private void takePicture() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        takePicture();
+
+        Log.v("TEST", "Test12342");
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                takePicture();
+//            }
+//            else {
+//                //TODO: permission denied :(
+//            }
+
         }
     }
 

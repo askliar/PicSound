@@ -43,6 +43,11 @@ public class Analyze extends AppCompatActivity implements View.OnClickListener {
     private Audio audio;
     private AudioMatcher matcher;
 
+    private int galery_state = 0;
+    private ArrayList<byte[]> byteArray;
+
+    private ImageView image;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,10 +56,10 @@ public class Analyze extends AppCompatActivity implements View.OnClickListener {
         audio = new Audio(getApplicationContext());
         matcher = new AudioMatcher(getApplicationContext());
 
-        ImageView image = (ImageView) findViewById(R.id.Image);
+        image = (ImageView) findViewById(R.id.Image);
         image.setOnClickListener(this);
         Bundle bundle = getIntent().getExtras();
-        ArrayList<byte[]> byteArray = new ArrayList<byte[]>();
+        byteArray = new ArrayList<byte[]>();
 
         Log.d("bundle",String.valueOf(bundle.get("Type")));
         if( ((int) bundle.get("Type"))==CAMERA){
@@ -87,13 +92,12 @@ public class Analyze extends AppCompatActivity implements View.OnClickListener {
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                     byteArray.add(stream.toByteArray());
-
-//                    Bitmap bitmap2 = BitmapFactory.decodeByteArray(byteArray.get(0) , 0, byteArray.size());
-//                    image.setImageBitmap(bitmap2);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
+                Bitmap bitmap2 = BitmapFactory.decodeByteArray(byteArray.get(galery_state % byteArray.size()) , 0, byteArray.get(galery_state % byteArray.size()).length);
+                image.setImageBitmap(bitmap2);
             }
         }
 
@@ -156,6 +160,17 @@ public class Analyze extends AppCompatActivity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+        galery_state = (galery_state + 1);
+        audio.stopAudio();
 
+
+        if(galery_state >= byteArray.size()) {
+            finish();
+            return;
+        }
+
+        Bitmap bitmap2 = BitmapFactory.decodeByteArray(byteArray.get(galery_state % byteArray.size()) , 0, byteArray.get(galery_state % byteArray.size()).length);
+        image.setImageBitmap(bitmap2);
+        analyzeInBackground(byteArray.get(galery_state % byteArray.size()));
     }
 }
