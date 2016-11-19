@@ -10,24 +10,26 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.joseph.picsound.MainActivity">
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Galary"
-        android:id="@+id/GalaryOpening"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Camera"
-        android:id="@+id/CameraOpen"
-        android:layout_marginLeft="12dp"
-        android:layout_marginStart="12dp"
-        android:layout_alignParentBottom="true"
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true"
+        android:gravity="center" >
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pick From Gallery"
+            android:id="@+id/GalaryOpening" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Take Photo"
+            android:id="@+id/CameraOpen" />
+
+    </LinearLayout>
 </RelativeLayout>
