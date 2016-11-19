@@ -60,6 +60,7 @@ public class Audio implements SoundPool.OnLoadCompleteListener {
                 for (AudioInformation info: fileInfos) {
                     soundPool.play(info.getStreamId(), info.getVolume(), info.getVolume(), 1, info.getLoopNumber(), 1.0f);
                 }
+                break;
             }
         }
     }
@@ -80,7 +81,7 @@ public class Audio implements SoundPool.OnLoadCompleteListener {
     @Override
     public void onLoadComplete(SoundPool soundPool, int i, int i1) {
         numLoaded++;
-        loaded = loaded && (i1 != 0);
+        loaded = loaded && (i1 == 0);
 
     }
 }

@@ -2,6 +2,7 @@ package com.example.joseph.picsound;
 
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -9,6 +10,7 @@ import android.support.annotation.IntegerRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.example.joseph.picsound.Utils.Audio;
@@ -32,7 +34,7 @@ import clarifai2.dto.input.image.ClarifaiImage;
 import clarifai2.dto.model.output.ClarifaiOutput;
 import clarifai2.dto.prediction.Concept;
 
-public class Analyze extends AppCompatActivity {
+public class Analyze extends AppCompatActivity implements View.OnClickListener {
     @Nullable
     private ClarifaiClient client;
     static final int CAMERA=1;
@@ -50,16 +52,21 @@ public class Analyze extends AppCompatActivity {
         matcher = new AudioMatcher(getApplicationContext());
 
         ImageView image = (ImageView) findViewById(R.id.Image);
+        image.setOnClickListener(this);
         Bundle bundle = getIntent().getExtras();
         ArrayList<byte[]> byteArray = new ArrayList<byte[]>();
 
         Log.d("bundle",String.valueOf(bundle.get("Type")));
         if( ((int) bundle.get("Type"))==CAMERA){
             byteArray.add(bundle.getByteArray("ByteArray"));
+            Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray.get(0) , 0, byteArray.size());
+            image.setImageBitmap(bitmap);
         }
         if( ((int) bundle.get("Type"))== GALARY){
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), (Uri) bundle.get("URI"));
+                image.setImageBitmap(bitmap);
+
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byte[] bytes = stream.toByteArray();
@@ -80,6 +87,9 @@ public class Analyze extends AppCompatActivity {
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                     byteArray.add(stream.toByteArray());
+
+//                    Bitmap bitmap2 = BitmapFactory.decodeByteArray(byteArray.get(0) , 0, byteArray.size());
+//                    image.setImageBitmap(bitmap2);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -142,5 +152,10 @@ public class Analyze extends AppCompatActivity {
                               }
 
                 );
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 }
