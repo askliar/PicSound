@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 
+import com.example.joseph.picsound.Utils.*;
 public class MainActivity extends AppCompatActivity {
 
     ImageView mImageView;
@@ -32,6 +33,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Button CameraOpen = (Button) findViewById(R.id.CameraOpen);
         Button GalaryOpen = (Button) findViewById(R.id.GalaryOpening);
+        synonymsRequest req = new synonymsRequest("Love");
+
+        while(req.getSyns().isEmpty()){}
+        Log.d("jsonMain",req.getSyns().toString());
+
+
+
         GalaryOpen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

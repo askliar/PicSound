@@ -71,6 +71,7 @@ public class AnalyzeImageTask extends AsyncTask<String, String, String>  {
 
 
         if (e != null) {
+            Log.e("error",e.getMessage());
             mCallback.onAnalysisComplete(null);
             Log.e("ANALYZE","Connection not possible: \n" + e.getMessage());
             this.e = null;
