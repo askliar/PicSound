@@ -4,4 +4,33 @@
     <string name="title_activity_analyze">Analyze</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string-array name="sound_names">
+        <item>baby_laughing</item>
+        <item>bird</item>
+        <item>campfire</item>
+        <item>car</item>
+        <item>cat</item>
+        <item>cow</item>
+        <item>crowd</item>
+        <item>crowd_talking</item>
+        <item>dog</item>
+        <item>fire</item>
+        <item>intersection</item>
+        <item>kid</item>
+        <item>kids</item>
+        <item>kids_playing</item>
+        <item>lake</item>
+        <item>man_laughing</item>
+        <item>rain</item>
+        <item>river</item>
+        <item>rooster</item>
+        <item>spring_weather</item>
+        <item>thunder</item>
+        <item>traffic</item>
+        <item>walking_in_snow</item>
+        <item>water</item>
+        <item>waves</item>
+        <item>windy_forest_ambience</item>
+    </string-array>
 </resources>

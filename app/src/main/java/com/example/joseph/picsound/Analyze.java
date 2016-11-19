@@ -71,14 +71,13 @@ public class Analyze extends AppCompatActivity {
             public void onAnalysisComplete(AnalysisResult result) {
                 if (result != null) {
                     List<Tuple<Integer, Float>> sounds = new ArrayList<>();
-                    for (Tag tag : result.tags) {
-                        int soundId = matcher.soundIdFromTag(tag);
-                        if(soundId != 0) {
-                            Log.v("TAG_ID", soundId + "");
-                            sounds.add(new Tuple<>(soundId, 1.0f));
-                        }
+                    List<Integer> soundIds = matcher.soundIdsFromTags(result.tags);
 
-                        Log.v("TAG", tag.name + "(p=" + tag.confidence + ")");
+                    for (int id : soundIds) {
+                        if(id != 0) {
+                            Log.v("SOUND_ID", id + "");
+                            sounds.add(new Tuple<>(id, 1.0f));
+                        }
                     }
 
                     audio.playSounds(sounds);
@@ -86,6 +85,8 @@ public class Analyze extends AppCompatActivity {
                         Log.v("CATEGORY", cat.name);
                     }
                 }
+
+                matcher.soundIdsFromTags(new ArrayList<Tag>());
             }
         }, bmp);
 
