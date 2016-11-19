@@ -9,12 +9,11 @@
 
     <string-array name="sound_names">
 
-        <item>baby</item>
-        <item>baby_laughing</item>
         <item>bird</item>
         <item>campfire</item>
         <item>car</item>
         <item>cat</item>
+        <item>fur</item>
         <item>child</item>
         <item>cow</item>
         <item>crowd_talking</item>
@@ -26,7 +25,6 @@
         <item>kids</item>
         <item>kids_playing</item>
         <item>lake</item>
-        <item>laughing</item>
         <item>people</item>
         <item>rain</item>
         <item>river</item>
